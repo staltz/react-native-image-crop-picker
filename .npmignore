@@ -1,4 +1,9 @@
 .git
+.github
+svg.svg
+ISSUE_TEMPLATE.md
+CONTRIBUTING.md
+CODE_OF_CONDUCT.md
 example
 node_modules
 build
