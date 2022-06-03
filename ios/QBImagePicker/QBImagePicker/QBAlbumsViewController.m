@@ -57,16 +57,16 @@ static bool isDarkMode() {
 - (void)viewDidLoad
 {
     [super viewDidLoad];
-    
+
     [self setUpToolbarItems];
-    
+
     // Fetch user albums and smart albums
     PHFetchResult *smartAlbums = [PHAssetCollection fetchAssetCollectionsWithType:PHAssetCollectionTypeSmartAlbum subtype:PHAssetCollectionSubtypeAny options:nil];
     PHFetchResult *userAlbums = [PHAssetCollection fetchAssetCollectionsWithType:PHAssetCollectionTypeAlbum subtype:PHAssetCollectionSubtypeAny options:nil];
     self.fetchResults = @[smartAlbums, userAlbums];
-    
+
     [self updateAssetCollections];
-    
+
     // Register observer
     [[PHPhotoLibrary sharedPhotoLibrary] registerChangeObserver:self];
 }
@@ -74,18 +74,18 @@ static bool isDarkMode() {
 - (void)viewWillAppear:(BOOL)animated
 {
     [super viewWillAppear:animated];
-    
+
     // Configure navigation item
     self.navigationItem.title = NSLocalizedStringFromTableInBundle(@"albums.title", @"QBImagePicker", self.imagePickerController.assetBundle, nil);
     self.navigationItem.prompt = self.imagePickerController.prompt;
-    
+
     // Show/hide 'Done' button
     if (self.imagePickerController.allowsMultipleSelection) {
         [self.navigationItem setRightBarButtonItem:self.doneButton animated:NO];
     } else {
         [self.navigationItem setRightBarButtonItem:nil animated:NO];
     }
-    
+
     [self updateControlState];
     [self updateSelectionInfo];
 }
@@ -132,21 +132,21 @@ static bool isDarkMode() {
     // Space
     UIBarButtonItem *leftSpace = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemFlexibleSpace target:nil action:NULL];
     UIBarButtonItem *rightSpace = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemFlexibleSpace target:nil action:NULL];
-    
+
     // Info label
     NSDictionary *attributes = @{ NSForegroundColorAttributeName: [UIColor blackColor] };
     UIBarButtonItem *infoButtonItem = [[UIBarButtonItem alloc] initWithTitle:@"" style:UIBarButtonItemStylePlain target:nil action:NULL];
     infoButtonItem.enabled = NO;
     [infoButtonItem setTitleTextAttributes:attributes forState:UIControlStateNormal];
     [infoButtonItem setTitleTextAttributes:attributes forState:UIControlStateDisabled];
-    
+
     self.toolbarItems = @[leftSpace, infoButtonItem, rightSpace];
 }
 
 - (void)updateSelectionInfo
 {
     NSMutableOrderedSet *selectedAssets = self.imagePickerController.selectedAssets;
-    
+
     if (selectedAssets.count > 0) {
         NSBundle *bundle = self.imagePickerController.assetBundle;
         NSString *format;
@@ -155,7 +155,7 @@ static bool isDarkMode() {
         } else {
             format = NSLocalizedStringFromTableInBundle(@"assets.toolbar.item-selected", @"QBImagePicker", bundle, nil);
         }
-        
+
         NSString *title = [NSString stringWithFormat:format, selectedAssets.count];
         [(UIBarButtonItem *)self.toolbarItems[1] setTitle:title];
     } else {
@@ -172,11 +172,11 @@ static bool isDarkMode() {
     NSArray *assetCollectionSubtypes = self.imagePickerController.assetCollectionSubtypes;
     NSMutableDictionary *smartAlbums = [NSMutableDictionary dictionaryWithCapacity:assetCollectionSubtypes.count];
     NSMutableArray *userAlbums = [NSMutableArray array];
-    
+
     for (PHFetchResult *fetchResult in self.fetchResults) {
         [fetchResult enumerateObjectsUsingBlock:^(PHAssetCollection *assetCollection, NSUInteger index, BOOL *stop) {
             PHAssetCollectionSubtype subtype = assetCollection.assetCollectionSubtype;
-            
+
             if (subtype == PHAssetCollectionSubtypeAlbumRegular) {
                 [userAlbums addObject:assetCollection];
             } else if ([assetCollectionSubtypes containsObject:@(subtype)]) {
@@ -187,23 +187,23 @@ static bool isDarkMode() {
             }
         }];
     }
-    
+
     NSMutableArray *assetCollections = [NSMutableArray array];
 
     // Fetch smart albums
     for (NSNumber *assetCollectionSubtype in assetCollectionSubtypes) {
         NSArray *collections = smartAlbums[assetCollectionSubtype];
-        
+
         if (collections) {
             [assetCollections addObjectsFromArray:collections];
         }
     }
-    
+
     // Fetch user albums
     [userAlbums enumerateObjectsUsingBlock:^(PHAssetCollection *assetCollection, NSUInteger index, BOOL *stop) {
         [assetCollections addObject:assetCollection];
     }];
-    
+
     self.assetCollections = assetCollections;
 }
 
@@ -211,44 +211,44 @@ static bool isDarkMode() {
 {
     UIGraphicsBeginImageContext(size);
     CGContextRef context = UIGraphicsGetCurrentContext();
-    
+
     UIColor *backgroundColor = [UIColor colorWithRed:(239.0 / 255.0) green:(239.0 / 255.0) blue:(244.0 / 255.0) alpha:1.0];
     UIColor *iconColor = [UIColor colorWithRed:(179.0 / 255.0) green:(179.0 / 255.0) blue:(182.0 / 255.0) alpha:1.0];
-    
+
     // Background
     CGContextSetFillColorWithColor(context, [backgroundColor CGColor]);
     CGContextFillRect(context, CGRectMake(0, 0, size.width, size.height));
-    
+
     // Icon (back)
     CGRect backIconRect = CGRectMake(size.width * (16.0 / 68.0),
                                      size.height * (20.0 / 68.0),
                                      size.width * (32.0 / 68.0),
                                      size.height * (24.0 / 68.0));
-    
+
     CGContextSetFillColorWithColor(context, [iconColor CGColor]);
     CGContextFillRect(context, backIconRect);
-    
+
     CGContextSetFillColorWithColor(context, [backgroundColor CGColor]);
     CGContextFillRect(context, CGRectInset(backIconRect, 1.0, 1.0));
-    
+
     // Icon (front)
     CGRect frontIconRect = CGRectMake(size.width * (20.0 / 68.0),
                                       size.height * (24.0 / 68.0),
                                       size.width * (32.0 / 68.0),
                                       size.height * (24.0 / 68.0));
-    
+
     CGContextSetFillColorWithColor(context, [backgroundColor CGColor]);
     CGContextFillRect(context, CGRectInset(frontIconRect, -1.0, -1.0));
-    
+
     CGContextSetFillColorWithColor(context, [iconColor CGColor]);
     CGContextFillRect(context, frontIconRect);
-    
+
     CGContextSetFillColorWithColor(context, [backgroundColor CGColor]);
     CGContextFillRect(context, CGRectInset(frontIconRect, 1.0, 1.0));
-    
+
     UIImage *image = UIGraphicsGetImageFromCurrentImageContext();
     UIGraphicsEndImageContext();
-    
+
     return image;
 }
 
@@ -263,11 +263,11 @@ static bool isDarkMode() {
 - (BOOL)isMaximumSelectionLimitReached
 {
     NSUInteger minimumNumberOfSelection = MAX(1, self.imagePickerController.minimumNumberOfSelection);
-    
+
     if (minimumNumberOfSelection <= self.imagePickerController.maximumNumberOfSelection) {
         return (self.imagePickerController.maximumNumberOfSelection <= self.imagePickerController.selectedAssets.count);
     }
-    
+
     return NO;
 }
 
@@ -281,6 +281,7 @@ static bool isDarkMode() {
 -(void)managePermissionAction:(id)sender
 {
     UIAlertController *actionSheet = [UIAlertController alertControllerWithTitle:NSLocalizedStringFromTableInBundle(@"permission.title", @"QBImagePicker", self.imagePickerController.assetBundle, nil) message:nil preferredStyle:UIAlertControllerStyleActionSheet];
+    actionSheet.popoverPresentationController.sourceView = sender;
 
     [actionSheet addAction:[UIAlertAction actionWithTitle:NSLocalizedStringFromTableInBundle(@"permission.cancel", @"QBImagePicker", self.imagePickerController.assetBundle, nil) style:UIAlertActionStyleCancel handler:nil]];
 
@@ -341,46 +342,46 @@ static bool isDarkMode() {
             [manageButton setTitle:NSLocalizedStringFromTableInBundle(@"permission.manage", @"QBImagePicker", self.imagePickerController.assetBundle, nil) forState:UIControlStateNormal];
             [manageButton sizeToFit];
             [cell setAccessoryView:manageButton];
-            
+
             UILabel *helpText = [[UILabel alloc] initWithFrame:CGRectMake(16,0,cell.contentView.frame.size.width - manageButton.frame.size.width + 24, frame.size.height)];
             helpText.font = [UIFont systemFontOfSize:13];
             [helpText setNumberOfLines:2];
             helpText.text = NSLocalizedStringFromTableInBundle(@"permission.help", @"QBImagePicker", self.imagePickerController.assetBundle, nil);
-            
+
             [cell.contentView addSubview:helpText];
 
             return cell;
         }
     }
-    
+
     QBAlbumCell *cell = [tableView dequeueReusableCellWithIdentifier:@"AlbumCell" forIndexPath:indexPath];
     cell.tag = indexPath.row;
     cell.borderWidth = 1.0 / [[UIScreen mainScreen] scale];
-    
+
     // Thumbnail
     PHAssetCollection *assetCollection = self.assetCollections[indexPath.row];
-    
+
     PHFetchOptions *options = [PHFetchOptions new];
-    
+
     switch (self.imagePickerController.mediaType) {
         case QBImagePickerMediaTypeImage:
             options.predicate = [NSPredicate predicateWithFormat:@"mediaType == %ld", PHAssetMediaTypeImage];
             break;
-            
+
         case QBImagePickerMediaTypeVideo:
             options.predicate = [NSPredicate predicateWithFormat:@"mediaType == %ld", PHAssetMediaTypeVideo];
             break;
-            
+
         default:
             break;
     }
-    
+
     PHFetchResult *fetchResult = [PHAsset fetchAssetsInAssetCollection:assetCollection options:options];
     PHImageManager *imageManager = [PHImageManager defaultManager];
-    
+
     if (fetchResult.count >= 3) {
         cell.imageView3.hidden = NO;
-        
+
         [imageManager requestImageForAsset:fetchResult[fetchResult.count - 3]
                                 targetSize:CGSizeScale(cell.imageView3.frame.size, [[UIScreen mainScreen] scale])
                                contentMode:PHImageContentModeAspectFill
@@ -393,10 +394,10 @@ static bool isDarkMode() {
     } else {
         cell.imageView3.hidden = YES;
     }
-    
+
     if (fetchResult.count >= 2) {
         cell.imageView2.hidden = NO;
-        
+
         [imageManager requestImageForAsset:fetchResult[fetchResult.count - 2]
                                 targetSize:CGSizeScale(cell.imageView2.frame.size, [[UIScreen mainScreen] scale])
                                contentMode:PHImageContentModeAspectFill
@@ -409,7 +410,7 @@ static bool isDarkMode() {
     } else {
         cell.imageView2.hidden = YES;
     }
-    
+
     if (fetchResult.count >= 1) {
         [imageManager requestImageForAsset:fetchResult[fetchResult.count - 1]
                                 targetSize:CGSizeScale(cell.imageView1.frame.size, [[UIScreen mainScreen] scale])
@@ -421,24 +422,24 @@ static bool isDarkMode() {
                                  }
                              }];
     }
-    
+
     if (fetchResult.count == 0) {
         cell.imageView3.hidden = NO;
         cell.imageView2.hidden = NO;
-        
+
         // Set placeholder image
         UIImage *placeholderImage = [self placeholderImageWithSize:cell.imageView1.frame.size];
         cell.imageView1.image = placeholderImage;
         cell.imageView2.image = placeholderImage;
         cell.imageView3.image = placeholderImage;
     }
-    
+
     // Album title
     cell.titleLabel.text = assetCollection.localizedTitle;
-    
+
     // Number of photos
     cell.countLabel.text = [NSString stringWithFormat:@"%lu", (long)fetchResult.count];
-    
+
     return cell;
 }
 
@@ -450,18 +451,18 @@ static bool isDarkMode() {
     dispatch_async(dispatch_get_main_queue(), ^{
         // Update fetch results
         NSMutableArray *fetchResults = [self.fetchResults mutableCopy];
-        
+
         [self.fetchResults enumerateObjectsUsingBlock:^(PHFetchResult *fetchResult, NSUInteger index, BOOL *stop) {
             PHFetchResultChangeDetails *changeDetails = [changeInstance changeDetailsForFetchResult:fetchResult];
-            
+
             if (changeDetails) {
                 [fetchResults replaceObjectAtIndex:index withObject:changeDetails.fetchResultAfterChanges];
             }
         }];
-        
+
         if (![self.fetchResults isEqualToArray:fetchResults]) {
             self.fetchResults = fetchResults;
-            
+
             // Reload albums
             [self updateAssetCollections];
             [self.tableView reloadData];
