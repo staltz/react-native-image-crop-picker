@@ -1,4 +1,4 @@
-declare module "react-native-image-crop-picker" {
+declare module "@staltz/react-native-image-crop-picker" {
     /**
      * AVAssetExportPreset presets.
      *
